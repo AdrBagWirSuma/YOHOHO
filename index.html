@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="A small birthday surprise made with love."
+    />
+    <title>For you, with love</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body data-page="home">
+    <main>
+      <section
+        id="opening"
+        class="hero split-hero"
+        aria-labelledby="home-title"
+      >
+        <div class="hero-copy reveal">
+          <p class="eyebrow">A little celebration <span>01 / 09</span></p>
+          <h1 id="home-title">
+            Happy birthday, <em id="birthday-name" data-config="birthdayName">Sharlaine.</em>
+          </h1>
+          <p class="lead">
+            There's something special prepared to make your special day
+            feel a bit warmer.
+          </p>
+          <button class="button button-primary" data-start type="button">
+            Start the surprise <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+      </section>
+    </main>
+    <audio id="birthday-audio" preload="auto"></audio>
+    <script type="module" src="js/script.js"></script>
+  </body>
+</html>

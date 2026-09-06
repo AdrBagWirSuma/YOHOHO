@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<title>Thank You for Being Honest</title>
+		<link rel="stylesheet" href="../css/style.css">
+	</head>
+	<body data-page="reject">
+		<main class="page-shell">
+			<div class="centered">
+				<p class="eyebrow">Thank you for being honest <span>09 / 09</span></p>
+				<h1 class="page-title">Thank you for being honest <em>So much.</em></h1>
+				<form class="content-card form-card" data-response-form data-response="reject">
+					<label for="reason">Your Reason</label>
+					<textarea id="reason" name="reason" required placeholder="Tell me why you rejected my feelings..."></textarea>
+					<p class="status" role="status"></p>
+					<button class="button button-danger" type="submit">Send Answer <span aria-hidden="true">&#8594;</span></button>
+				</form>
+				<div class="content-card response-success is-hidden">
+					<p>Thank you for being honest <em>So much.</em></p>
+					<p class="response-date" data-response-date></p>
+				</div>
+			</div>
+		</main>
+		<audio id="dating-audio" preload="auto" loop></audio>
+		<script type="module" src="../js/script.js"></script>
+	</body>
+</html>
