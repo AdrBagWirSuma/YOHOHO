@@ -1,19 +1,14 @@
-import { addDoc, collection, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { db } from "./firebase-config.js";
-
 const DEFAULT = {
   birthdayName: "Sharlaine",
   senderName: "someone who loves you",
   mainPhoto: "Assets/images/photo0.jpg",
   birthdayMusic: "Assets/music/lagu-hbd.mp3",
-  datingMusic: "Assets/music/lagu-jadian.mp3",
-  questionText: "Would you be my girlfriend even if it has to be a secret according to what you want beforehand?",
 };
 const page = document.body.dataset.page;
 const config = { ...DEFAULT };
 const AUDIO_FALLBACKS = {
   birthday: "Assets/music/lagu-hbd.mp3",
-  dating: "Assets/music/lagu-jadian.mp3",
+  dating: "Assets/music/lagu-hbd.mp3",
 };
 
 function resolveAsset(path) {
@@ -22,21 +17,7 @@ function resolveAsset(path) {
   return page === "home" ? cleanPath : `../${cleanPath}`;
 }
 
-async function loadConfig() {
-  if (!db) {
-    document.querySelectorAll("[data-config]").forEach((element) => {
-      const value = config[element.dataset.config];
-      if (value) element.textContent = value;
-    });
-    return;
-  }
-
-  try {
-    const snapshot = await getDoc(doc(db, "settings", "website-config"));
-    if (snapshot.exists()) Object.assign(config, snapshot.data());
-  } catch (error) {
-    console.warn("Memakai konfigurasi default./Using the default configuration.", error);
-  }
+function loadConfig() {
   document.querySelectorAll("[data-config]").forEach((element) => {
     const value = config[element.dataset.config];
     if (value) element.textContent = value;
@@ -79,14 +60,13 @@ function showMusicPrompt(mode) {
     audio.id = id;
     document.body.append(audio);
   }
-  audio.loop = mode === "dating";
+  audio.loop = true;
   return audio;
 }
 
 function playMusic(mode) {
   const audio = createAudio(mode);
-  const configuredPath =
-    mode === "dating" ? config.datingMusic : config.birthdayMusic;
+  const configuredPath = config.birthdayMusic;
   const paths = [configuredPath, AUDIO_FALLBACKS[mode]].filter(
     (path, index, all) => path && all.indexOf(path) === index,
   );
@@ -142,54 +122,8 @@ function startSlideshow() {
   }, 5000);
 }
 
-async function submitResponse(answer, form) {
-  const reason = form.elements.reason.value.trim();
-  const status = form.querySelector(".status");
-  if (!reason) {
-    status.textContent = "Please fill in your reason first.";
-    form.elements.reason.focus();
-    return;
-  }
-  if (!db) {
-    status.textContent = "Firebase is not configured yet. Add the real configuration to send your answer.";
-    return;
-  }
-  const button = form.querySelector("button[type=submit]");
-  button.disabled = true;
-  status.textContent = "Submit your answer...";
-  try {
-    await addDoc(collection(db, "responses"), {
-      answer,
-      reason,
-      createdAt: serverTimestamp(),
-    });
-    localStorage.setItem("response-submitted", answer);
-    localStorage.setItem("response-date", new Date().toISOString());
-    form.classList.add("is-hidden");
-    form.nextElementSibling?.classList.remove("is-hidden");
-    if (answer === "accept") celebrate();
-  } catch (error) {
-    console.error(error);
-    status.textContent = "Your answer could not be sent. Please check your Firebase configuration.";
-    button.disabled = false;
-  }
-}
-
-function celebrate() {
-  for (let index = 0; index < 18; index += 1) {
-    const heart = document.createElement("span");
-    heart.className = "heart";
-    heart.textContent = "♥";
-    heart.style.left = `${Math.random() * 100}%`;
-    heart.style.bottom = `${Math.random() * 15}%`;
-    heart.style.animationDelay = `${Math.random() * 0.8}s`;
-    document.body.append(heart);
-    setTimeout(() => heart.remove(), 4800);
-  }
-}
-
-async function init() {
-  await loadConfig();
+function init() {
+  loadConfig();
   if (page === "home") {
     document.querySelector("[data-start]")?.addEventListener("click", () => {
       if (confirm("This little surprise is ready to be opened. Starting now?")) {
@@ -202,30 +136,12 @@ async function init() {
   if (page === "birthday-letter" || page === "transition") {
     playMusic("birthday");
   }
-  if (
-    [
-      "short-letter",
-      "memories",
-      "heart-letter",
-      "proposal",
-      "accept",
-      "reject",
-    ].includes(page)
-  ) {
-    playMusic("dating");
+  if (["short-letter", "memories", "heart-letter", "closing"].includes(page)) {
+    playMusic("birthday");
   }
   if (page === "memories") startSlideshow();
   if (page !== "home") {
-    const retryMode = [
-      "short-letter",
-      "memories",
-      "heart-letter",
-      "proposal",
-      "accept",
-      "reject",
-    ].includes(page)
-      ? "dating"
-      : "birthday";
+    const retryMode = "birthday";
     const retryMusic = () => {
       playMusic(retryMode);
     };
@@ -238,28 +154,5 @@ async function init() {
       navigate(button.dataset.next, button.dataset.mode || "birthday");
     });
   });
-  document.querySelectorAll("[data-answer]").forEach((button) => {
-    button.addEventListener("click", () => {
-      navigate(button.dataset.answer, "dating");
-    });
-  });
-  const form = document.querySelector("[data-response-form]");
-  if (form) {
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      submitResponse(form.dataset.response, form);
-    });
-  }
-  const success = document.querySelector(".response-success");
-  if (success && localStorage.getItem("response-submitted") === page) {
-    document.querySelector("[data-response-form]")?.classList.add("is-hidden");
-    success.classList.remove("is-hidden");
-  }
-  const date = document.querySelector("[data-response-date]");
-  if (date) {
-    date.textContent = new Intl.DateTimeFormat("id-ID", {
-      dateStyle: "full",
-    }).format(new Date(localStorage.getItem("response-date") || Date.now()));
-  }
 }
 init();
